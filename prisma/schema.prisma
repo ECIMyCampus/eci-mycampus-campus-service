@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model University {
+  id        String     @id @default("ECI")
+  name      String
+  buildings Building[]
+
+  @@map("universities")
+  @@schema("campus_schema")
+}
+
+model Building {
+  id             String         @id
+  code           String
+  name           String
+  svgElementId   String         @map("svg_element_id")
+  centerLatitude Float          @map("center_latitude")
+  centerLongitude Float         @map("center_longitude")
+  floorsCount    Int            @default(1) @map("floors_count")
+  academicInfo   String?        @map("academic_info")
+  isActive       Boolean        @default(true) @map("is_active")
+  universityId   String         @default("ECI") @map("university_id")
+  university     University     @relation(fields: [universityId], references: [id])
+  services       CampusService[]
+
+  @@map("buildings")
+  @@schema("campus_schema")
+}
+
+model SportsFacility {
+  id           String   @id
+  name         String
+  sportTypes   String[] @map("sport_types")
+  svgElementId String   @map("svg_element_id")
+  isActive     Boolean  @default(true) @map("is_active")
+
+  @@map("sports_facilities")
+  @@schema("campus_schema")
+}
+
+enum ServiceType {
+  RESTAURANTE
+  BIBLIOTECA
+  ENFERMERIA
+  FOTOCOPIAS
+  PARQUEADERO
+  OFICINA
+}
+
+model CampusService {
+  id             String      @id
+  name           String
+  serviceType    ServiceType @map("service_type")
+  operatingHours String?     @map("operating_hours")
+  buildingId     String      @map("building_id")
+  building       Building    @relation(fields: [buildingId], references: [id])
+
+  @@map("campus_services")
+  @@schema("campus_schema")
+}
