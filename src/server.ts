@@ -1,15 +1,19 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import dotenv from 'dotenv';
+import { campusRoutes } from './routes/campus.routes';
 
 dotenv.config();
 
 const server = Fastify({
-  logger: true,
+  logger: {
+    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  },
 });
 
 server.register(cors, {
-  origin: true,
+  origin: process.env.CORS_ORIGIN || true,
+  credentials: true,
 });
 
 // Health check
@@ -17,14 +21,8 @@ server.get('/health', async () => {
   return { status: 'ok', service: 'campus-service', timestamp: new Date().toISOString() };
 });
 
-// Rutas de edificios y campus
-server.get('/api/v1/campus/buildings', async (request, reply) => {
-  return reply.status(501).send({ message: 'Ruta en implementación - Etapa 4' });
-});
-
-server.get('/api/v1/campus/buildings/:id', async (request, reply) => {
-  return reply.status(501).send({ message: 'Ruta en implementación - Etapa 4' });
-});
+// Registrar rutas del dominio de campus e infraestructura
+server.register(campusRoutes, { prefix: '/api/v1/campus' });
 
 const start = async () => {
   try {
